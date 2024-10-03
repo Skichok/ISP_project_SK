@@ -9,21 +9,103 @@ import os
 from datetime import datetime
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    file_name = f"User_data/{user_id}.txt"
+
+    # Check if the file exists
+    if os.path.exists(file_name):
+    # If file exists, append the new numbers to a new line
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id}: /start")
+        print(f"Logs added to {file_name}.")
+    else:
+    # If file doesn't exist, create the file and write the numbers
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id}: /start")
+        print(f"File {file_name} created and logs saved.")
+        
     await update.message.reply_text(f'Hello {update.effective_user.first_name}!\nI am a chat bot that can analyze websites and also send your prompt to Google`s Gemini neural network.\nList of commands: /list')
+
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    file_name = f"User_data/{user_id}.txt"
+
+    # Check if the file exists
+    if os.path.exists(file_name):
+    # If file exists, append the new numbers to a new line
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id}: /start")
+        print(f"Logs added to {file_name}.")
+    else:
+    # If file doesn't exist, create the file and write the numbers
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id}: /hello")
+        print(f"File {file_name} created and logs saved.")
     await update.message.reply_text(f'Hello {update.effective_user.first_name}')
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    file_name = f"User_data/{user_id}.txt"
+
+    # Check if the file exists
+    if os.path.exists(file_name):
+    # If file exists, append the new numbers to a new line
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id}: /ping")
+        print(f"Logs added to {file_name}.")
+    else:
+    # If file doesn't exist, create the file and write the numbers
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id}: /ping")
+        print(f"File {file_name} created and logs saved.")
+        
     await update.message.reply_text('pong')
 
 async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/ping - The bot responds pong\n/start')
+    user_id = update.effective_user.id
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    file_name = f"User_data/{user_id}.txt"
+
+    # Check if the file exists
+    if os.path.exists(file_name):
+    # If file exists, append the new numbers to a new line
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id}: /list")
+        print(f"Logs added to {file_name}.")
+    else:
+    # If file doesn't exist, create the file and write the numbers
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id}: /list")
+        print(f"File {file_name} created and logs saved.")
+        
+    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/ping - The bot responds pong\nOr you can send me picture, and I will reply what size it has in pixels!')
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Start")
     user_id = update.effective_user.id
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    file_name = f"User_data/{user_id}.txt"
+
+    # Check if the file exists
+    if os.path.exists(file_name):
+    # If file exists, append the new numbers to a new line
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id} sent a photo file_{user_id}_{unique_timestamp}")
+        print(f"Logs added to {file_name}.")
+    else:
+    # If file doesn't exist, create the file and write the numbers
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id} sent a photo file_{user_id}_{unique_timestamp}")
+        print(f"File {file_name} created and logs saved.")
+    
     # Get the photo file (use the largest available size)
     photo = update.message.photo[-1]
     print(0)
