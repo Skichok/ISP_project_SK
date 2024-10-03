@@ -5,6 +5,8 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 from PIL import Image
 import io
+import os
+from datetime import datetime
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f'Hello {update.effective_user.first_name}!\nI am a chat bot that can analyze websites and also send your prompt to Google`s Gemini neural network.\nList of commands: /list')
@@ -19,6 +21,9 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Start")
+    user_id = update.effective_user.id
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     # Get the photo file (use the largest available size)
     photo = update.message.photo[-1]
     print(0)
@@ -31,6 +36,9 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     # Load the image using PIL
     image = Image.open(io.BytesIO(photo_data))
     width, height = image.size
+
+    file_name = f"User_photo/file_{user_id}_{unique_timestamp}.jpg"  # Unique filename based on file_id
+    image.save(file_name)
 
     # Send the dimensions back to the user
     await update.message.reply_text(f'The photo size is {width}x{height} pixels.')
