@@ -49,3 +49,5 @@ app.add_handler(CommandHandler("list", list))
 app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
 
 app.run_polling()
+
+#:)
