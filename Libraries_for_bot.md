@@ -1,2 +1,3 @@
 pip install python-telegram-bot
 pip install pillow 
+pip install qrcode
