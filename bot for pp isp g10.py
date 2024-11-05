@@ -93,7 +93,7 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             file.write(f"[{current_time}] {user_id}: /list")
         print(f"File {file_name} created and logs saved.")
         
-    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n/findphoto [prompt] - Will send you a google picture.\n\nOr you can send me picture, and I will reply what size it has in pixels!')
+    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n/findphoto [prompt] - Will send you a google picture.\n/feedback [text] - Please, write your feedback about the bot, or anything you would like us to add!\n\nOr you can send me picture, and I will reply what size it has in pixels!')
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Start")
@@ -425,6 +425,40 @@ async def findphoto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("No image found for your query.")
 
 
+async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    user_name = update.effective_user.username  # Получаем имя пользователя
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    feedback_text = ' '.join(context.args)  # Текст обратной связи (после команды)
+
+    if not feedback_text:
+        await update.message.reply_text(
+            "Please provide your feedback after the command. Example: /feedback Your feedback here.")
+        return
+
+    file_name = f"User_data/feedback_{user_name}_{unique_timestamp}.txt"
+
+    # Сохраняем обратную связь в новый файл с кодировкой utf-8
+    with open(file_name, 'w', encoding='utf-8') as file:
+        file.write(f"[{current_time}] Feedback from {user_name} ({user_id}):\n{feedback_text}\n")
+    print(f"Feedback saved to {file_name}.")
+
+    # Логируем использование команды /feedback с кодировкой utf-8
+    log_file_name = f"User_data/{user_id}.txt"
+    if os.path.exists(log_file_name):
+        with open(log_file_name, 'a', encoding='utf-8') as log_file:
+            log_file.write(
+                f"\n[{current_time}] {user_id}: /feedback {feedback_text[:50]}...")  # Логирование первых 50 символов
+        print(f"Logs added to {log_file_name}.")
+    else:
+        with open(log_file_name, 'w', encoding='utf-8') as log_file:
+            log_file.write(
+                f"[{current_time}] {user_id}: /feedback {feedback_text[:50]}...")  # Логирование первых 50 символов
+        print(f"Logs added to {log_file_name}.")
+
+    await update.message.reply_text(f"Thank you for your feedback, {update.effective_user.first_name}!")
+
 
 app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build()
 
@@ -447,6 +481,8 @@ app.add_handler(CommandHandler("graph", graph))
 app.add_handler(CommandHandler("polgraph", polgraph))
 
 app.add_handler(CommandHandler("findphoto", findphoto))
+
+app.add_handler(CommandHandler("feedback", feedback))
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
