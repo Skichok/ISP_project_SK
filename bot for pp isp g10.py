@@ -92,7 +92,7 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             file.write(f"[{current_time}] {user_id}: /list")
         print(f"File {file_name} created and logs saved.")
         
-    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/ping - The bot responds pong\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\nOr you can send me picture, and I will reply what size it has in pixels!')
+    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n\nOr you can send me picture, and I will reply what size it has in pixels!')
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Start")
@@ -307,6 +307,72 @@ async def graph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     with open(graph_filename, 'rb') as image_file:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_file)
 
+async def polgraph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    username = update.effective_user.username
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    file_name = f"User_data/{user_id}.txt"
+
+    # Log the command usage
+    expression_text = ' '.join(context.args)  # Get the expression from the command arguments
+
+    # Append log entry
+    if os.path.exists(file_name):
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id}: /polgraph {expression_text}")
+        print(f"Logs added to {file_name}.")
+    else:
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id}: /polgraph {expression_text}")
+        print(f"File {file_name} created and logs saved.")
+
+    # Insert '*' between numbers and variables for multiplication (e.g., convert '2r' to '2*r')
+    expression_text = re.sub(r'(?<=[0-9])(?=[a-zA-Z])', '*', expression_text)
+
+    # Parse the expression
+    try:
+        r = sp.symbols('r')  # Define the symbol 'r' for polar coordinates
+        expression = sp.sympify(expression_text)  # Parse the expression
+    except (sp.SympifyError, ValueError):
+        await update.message.reply_text("Invalid mathematical expression. Please try again.")
+        return
+
+    # Generate theta values
+    theta_values = np.linspace(0, 2 * np.pi, 400)  # 0 to 2π
+    try:
+        # Use lambdify to convert sympy expression to a function that numpy can understand
+        r_values = sp.lambdify(r, expression, "numpy")(theta_values)  # Evaluate r as a function of theta
+    except Exception as e:
+        await update.message.reply_text("Error evaluating the expression. Please check the function syntax.")
+        return
+
+    # Create polar plot
+    plt.figure(facecolor='black')  # Set the figure background color
+    ax = plt.subplot(111, projection='polar')  # Create polar subplot
+    ax.plot(theta_values, r_values, color='cyan', label=f'r = {expression_text}')  # Plot in cyan color
+
+    # Title and labels with white color for visibility on dark background
+    ax.set_title(f'Polar Graph of r = {expression_text}', color='white')
+    ax.set_xlabel('θ', color='white')  # Label for theta
+    ax.set_ylabel('r', color='white')  # Label for r
+
+    # Additional plot formatting
+    ax.grid(color='gray')  # Set gridlines to gray
+    ax.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right')  # Legend with white text
+    ax.tick_params(colors='white')  # Set the tick labels color to white
+    ax.set_facecolor("black")  # Set the axes background color to black
+
+    # Save the polar plot with a unique filename
+    polar_graph_filename = f"PGraph_pic/polar_graph_{username}_{unique_timestamp}.png"
+    plt.savefig(polar_graph_filename, facecolor='black')  # Ensure the background remains black when saved
+    plt.close()
+
+    # Send the polar plot back to the user
+    with open(polar_graph_filename, 'rb') as image_file:
+        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_file)
+
+
 app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build()
 
 app.add_handler(CommandHandler("hello", hello))
@@ -324,6 +390,8 @@ app.add_handler(CommandHandler("qrcode", qr_code))
 app.add_handler(CommandHandler("buttons", buttons))
 
 app.add_handler(CommandHandler("graph", graph))
+
+app.add_handler(CommandHandler("polgraph", polgraph))
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
