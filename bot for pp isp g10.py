@@ -279,24 +279,33 @@ async def graph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Error evaluating the expression. Please check the function syntax.")
         return
 
-    # Plot the function
-    plt.figure()
-    plt.plot(x_values, y_values, label=f'y = {expression_text}')
-    plt.title(f'Graph of y = {expression_text}')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.grid(True)
-    plt.legend()
+    # Plot the function with a dark theme
+    plt.figure(facecolor='black')  # Set the figure background color
+    plt.plot(x_values, y_values, color='cyan', label=f'y = {expression_text}')  # Plot in cyan color
+
+    # Add coordinate axes
+    plt.axhline(0, color='white', linewidth=0.8)  # x-axis in white
+    plt.axvline(0, color='white', linewidth=0.8)  # y-axis in white
+
+    # Title and labels with white color for visibility on dark background
+    plt.title(f'Graph of y = {expression_text}', color='white')
+    plt.xlabel('x', color='white')
+    plt.ylabel('y', color='white')
+
+    # Additional plot formatting
+    plt.grid(True, color='gray')  # Set gridlines to gray
+    plt.legend(facecolor='black', edgecolor='white')  # Legend with black background and white edge
+    plt.gca().set_facecolor("black")  # Set the axes background color to black
+    plt.tick_params(colors='white')  # Set the tick labels color to white
 
     # Save the plot with a unique filename
     graph_filename = f"Graph_pic/graph_{username}_{unique_timestamp}.png"
-    plt.savefig(graph_filename)
+    plt.savefig(graph_filename, facecolor='black')  # Ensure the background remains black when saved
     plt.close()
 
     # Send the plot back to the user
     with open(graph_filename, 'rb') as image_file:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_file)
-
 
 app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build()
 
