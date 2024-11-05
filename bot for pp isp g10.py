@@ -14,6 +14,7 @@ import numpy as np
 import sympy as sp  # to parse mathematical expressions
 import imageio
 import re
+from icrawler.builtin import GoogleImageCrawler
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
@@ -92,7 +93,7 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             file.write(f"[{current_time}] {user_id}: /list")
         print(f"File {file_name} created and logs saved.")
         
-    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n\nOr you can send me picture, and I will reply what size it has in pixels!')
+    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n/findphoto [prompt] - Will send you a google picture.\n\nOr you can send me picture, and I will reply what size it has in pixels!')
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Start")
@@ -373,6 +374,58 @@ async def polgraph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_file)
 
 
+async def findphoto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    username = update.effective_user.username
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    datestamp = datetime.now().strftime("%Y%m%d")
+
+    # Log command usage
+    file_name = f"User_data/{user_id}.txt"
+    if os.path.exists(file_name):
+        with open(file_name, 'a') as file:
+            file.write(f"\n[{current_time}] {user_id}: /findphoto {context.args} [USER GOT foundphoto_{username}_{datestamp}.jpg]")
+    else:
+        with open(file_name, 'w') as file:
+            file.write(f"[{current_time}] {user_id}: /findphoto {context.args} [USER GOT foundphoto_{username}_{datestamp}.jpg]")
+
+    # Get the search query
+    query = ' '.join(context.args)  # Join all arguments as a single search query
+    if not query:
+        await update.message.reply_text("Please provide a search query after the command.")
+        return
+
+    # Create an instance of GoogleImageCrawler
+    google_crawler = GoogleImageCrawler(storage={'root_dir': 'G_pic'})
+
+    # Crawl for images using the provided query
+    google_crawler.crawl(keyword=query, max_num=1)
+
+    # After crawling, check for the downloaded image and rename it
+    original_image_pattern = 'G_pic/000001.jpg'  # Default filename from icrawler
+    found_image_filename = f"foundphoto_{username}_{datestamp}.jpg"
+    new_image_path = os.path.join('G_pic', found_image_filename)
+
+    # Check if the original image exists and rename it
+    if os.path.exists(original_image_pattern):
+        # Ensure the new filename is unique
+        counter = 1
+        unique_new_image_path = new_image_path
+        while os.path.exists(unique_new_image_path):
+            unique_new_image_path = os.path.join('G_pic', f"foundphoto_{username}_{datestamp}_{counter}.jpg")
+            counter += 1
+
+        # Rename the image file
+        os.rename(original_image_pattern, unique_new_image_path)
+
+        # Send the found image back to the user
+        with open(unique_new_image_path, 'rb') as image_file:
+            await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_file)
+    else:
+        await update.message.reply_text("No image found for your query.")
+
+
+
 app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build()
 
 app.add_handler(CommandHandler("hello", hello))
@@ -392,6 +445,8 @@ app.add_handler(CommandHandler("buttons", buttons))
 app.add_handler(CommandHandler("graph", graph))
 
 app.add_handler(CommandHandler("polgraph", polgraph))
+
+app.add_handler(CommandHandler("findphoto", findphoto))
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
