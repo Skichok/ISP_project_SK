@@ -294,7 +294,7 @@ async def graph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Additional plot formatting
     plt.grid(True, color='gray')  # Set gridlines to gray
-    plt.legend(facecolor='black', edgecolor='white')  # Legend with black background and white edge
+    plt.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right')  # Legend with white text
     plt.gca().set_facecolor("black")  # Set the axes background color to black
     plt.tick_params(colors='white')  # Set the tick labels color to white
 
