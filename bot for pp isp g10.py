@@ -7,60 +7,60 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from PIL import Image
 import io
 import os
-from datetime import datetime
-import qrcode
-import matplotlib.pyplot as plt
-import numpy as np
-import sympy as sp  # to parse mathematical expressions
+from datetime import datetime #for datestamp
+import qrcode #to create qrcode
+import matplotlib.pyplot as plt #to create graphs
+import numpy as np #to create graphs
+import sympy as sp #to parse mathematical expressions
 import imageio
 import re
-from icrawler.builtin import GoogleImageCrawler
+from icrawler.builtin import GoogleImageCrawler #to parse photoes
 
 
-def vigenere_encrypt(key, text):
+def vigenere_encrypt(key, text): #function to encrypt text with key
     encrypted_text = []
     key = key.upper()
     key_length = len(key)
 
     for i, char in enumerate(text):
-        if char.isalpha():  # Проверяем, является ли символ буквой
+        if char.isalpha():  # Check if a character is a letter
             is_upper = char.isupper()
             shift = ord(key[i % key_length]) - ord('A')
             base = ord('A') if is_upper else ord('a')
 
-            # Шифрование символа с учетом сдвига
+            # Encrypting a symbol with shift
             encrypted_char = chr((ord(char) - base + shift) % 26 + base)
             encrypted_text.append(encrypted_char)
         else:
-            # Оставляем символ без изменений, если это не буква
+            # Leave the symbol unchanged if it is not a letter
             encrypted_text.append(char)
 
     return ''.join(encrypted_text)
 
-def vigenere_decrypt(key, text):
+def vigenere_decrypt(key, text): #function to decrypt text with key
     decrypted_text = []
     key = key.upper()
     key_length = len(key)
 
     for i, char in enumerate(text):
-        if char.isalpha():  # Проверяем, является ли символ буквой
+        if char.isalpha():  # Check if a character is a letter
             is_upper = char.isupper()
             shift = ord(key[i % key_length]) - ord('A')
             base = ord('A') if is_upper else ord('a')
 
-            # Дешифрование символа с учетом сдвига
+            # Decoding a symbol taking into account the shift
             decrypted_char = chr((ord(char) - base - shift) % 26 + base)
             decrypted_text.append(decrypted_char)
         else:
-            # Оставляем символ без изменений, если это не буква
+            # Leave the symbol unchanged if it is not a letter
             decrypted_text.append(char)
 
     return ''.join(decrypted_text)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = update.effective_user.id
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    user_id = update.effective_user.id # stating user id
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")# stating current time
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")# stating unique timestamp
     file_name = f"User_data/{user_id}.txt"
 
     # Check if the file exists
@@ -468,10 +468,10 @@ async def findphoto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
-    user_name = update.effective_user.username  # Получаем имя пользователя
+    user_name = update.effective_user.username  # Getting the username
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-    feedback_text = ' '.join(context.args)  # Текст обратной связи (после команды)
+    feedback_text = ' '.join(context.args)  # Feedback text (after the command)
 
     if not feedback_text:
         await update.message.reply_text(
@@ -480,22 +480,22 @@ async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     file_name = f"User_data/feedback_{user_name}_{unique_timestamp}.txt"
 
-    # Сохраняем обратную связь в новый файл с кодировкой utf-8
+    # Save the feedback to a new file with utf-8 encoding
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(f"[{current_time}] Feedback from {user_name} ({user_id}):\n{feedback_text}\n")
     print(f"Feedback saved to {file_name}.")
 
-    # Логируем использование команды /feedback с кодировкой utf-8
+    # Logging the use of the /feedback command with utf-8 encoding
     log_file_name = f"User_data/{user_id}.txt"
     if os.path.exists(log_file_name):
         with open(log_file_name, 'a', encoding='utf-8') as log_file:
             log_file.write(
-                f"\n[{current_time}] {user_id}: /feedback {feedback_text[:50]}...")  # Логирование первых 50 символов
+                f"\n[{current_time}] {user_id}: /feedback {feedback_text[:100]}...")  # Logging the first 100 characters
         print(f"Logs added to {log_file_name}.")
     else:
         with open(log_file_name, 'w', encoding='utf-8') as log_file:
             log_file.write(
-                f"[{current_time}] {user_id}: /feedback {feedback_text[:50]}...")  # Логирование первых 50 символов
+                f"[{current_time}] {user_id}: /feedback {feedback_text[:100]}...")  # Logging the first 100 characters
         print(f"Logs added to {log_file_name}.")
 
     await update.message.reply_text(f"Thank you for your feedback, {update.effective_user.first_name}!")
@@ -503,23 +503,23 @@ async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def encrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
-    user_name = update.effective_user.username  # Получаем имя пользователя
+    user_name = update.effective_user.username  # Getting the username
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-    key = context.args[0] #Определяем ключ шифрования в отдельную переменную
-    prompt = " ".join(context.args[1:]) #Определяем текст, который мы хотим зашифровать
+    key = context.args[0] #Define the encryption key in a separate variable
+    prompt = " ".join(context.args[1:]) #Define the text we want to encrypt
     print(context.args)
 
     log_file_name = f"User_data/{user_id}.txt"
     if os.path.exists(log_file_name):
         with open(log_file_name, 'a', encoding='utf-8') as log_file:
             log_file.write(
-                f"\n[{current_time}] {user_id}: /encrypt {key} {prompt}")  #Логирование если такой файл уже есть
+                f"\n[{current_time}] {user_id}: /encrypt {key} {prompt}")  #Logging if such a file already exists
         print(f"Logs added to {log_file_name}.")
     else:
         with open(log_file_name, 'w', encoding='utf-8') as log_file:
             log_file.write(
-                f"[{current_time}] {user_id}: /encrypt {key} {prompt}")  #Логирование если такого файла нет
+                f"[{current_time}] {user_id}: /encrypt {key} {prompt}")  #Logging if there is no such file
         print(f"Logs added to {log_file_name}.")
 
     await update.message.reply_text(f"This is what happened after the Vigenere encryption:\n{vigenere_encrypt(key, prompt)}")
@@ -527,23 +527,23 @@ async def encrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def decrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
-    user_name = update.effective_user.username  # Получаем имя пользователя
+    user_name = update.effective_user.username  # Getting the username
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-    key = context.args[0] #Определяем ключ шифрования в отдельную переменную
-    prompt = " ".join(context.args[1:]) #Определяем текст, который мы хотим зашифровать
+    key = context.args[0] #Define the encryption key in a separate variable
+    prompt = " ".join(context.args[1:]) #Define the text we want to encrypt
     print(context.args)
 
     log_file_name = f"User_data/{user_id}.txt"
     if os.path.exists(log_file_name):
         with open(log_file_name, 'a', encoding='utf-8') as log_file:
             log_file.write(
-                f"\n[{current_time}] {user_id}: /decrypt {key} {prompt}")  #Логирование если такой файл уже есть
+                f"\n[{current_time}] {user_id}: /decrypt {key} {prompt}")  #Logging if such a file already exists
         print(f"Logs added to {log_file_name}.")
     else:
         with open(log_file_name, 'w', encoding='utf-8') as log_file:
             log_file.write(
-                f"[{current_time}] {user_id}: /decrypt {key} {prompt}")  #Логирование если такого файла нет
+                f"[{current_time}] {user_id}: /decrypt {key} {prompt}")  #Logging if there is no such file
         print(f"Logs added to {log_file_name}.")
 
     await update.message.reply_text(f"This is what happened after deciphering Vigenere:\n{vigenere_decrypt(key, prompt)}")
@@ -551,7 +551,7 @@ async def decrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
-    user_name = update.effective_user.username  # Получаем имя пользователя
+    user_name = update.effective_user.username  # Getting the username
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     print(context.args)
@@ -564,12 +564,12 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if os.path.exists(log_file_name):
         with open(log_file_name, 'a', encoding='utf-8') as log_file:
             log_file.write(
-                f"\n[{current_time}] {user_id}: /learn {prompt}")  #Логирование если такой файл уже есть
+                f"\n[{current_time}] {user_id}: /learn {prompt}")  #Logging if such a file already exists
         print(f"Logs added to {log_file_name}.")
     else:
         with open(log_file_name, 'w', encoding='utf-8') as log_file:
             log_file.write(
-                f"[{current_time}] {user_id}: /learn {prompt}")  #Логирование если такого файла нет
+                f"[{current_time}] {user_id}: /learn {prompt}")  #Logging if there is no such file
         print(f"Logs added to {log_file_name}.")
 
     if prompt == "start" or prompt == "list" or prompt == "hello" or prompt == "buttons" or prompt == "feedback" or prompt == "learn":
@@ -590,45 +590,44 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f"This function downloads the image, analyzes it, records the resolution, and then we return it to you.")
     else:
         await update.message.reply_text(f"Sorry, there is no such function in the bot. Perhaps you made a typo, or are looking for a non-existent function")
-
+    #Find out the function the user wants to know about and send a suitable response
 async def facedetect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f"This feature is currently under development and will be added very soon. We will be waiting for you soon!")
 
-app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build()
+app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build() #Connecting to the bot using token
 
-app.add_handler(CommandHandler("hello", hello))
+app.add_handler(CommandHandler("hello", hello)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("ping", ping))
+app.add_handler(CommandHandler("ping", ping)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("start", start)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("list", list))
+app.add_handler(CommandHandler("list", list)) #Creating handler for command with function
 
-app.add_handler(MessageHandler(filters.PHOTO, photo_handler))
+app.add_handler(MessageHandler(filters.PHOTO, photo_handler)) #Creating handler to define the picture size without additional command
 
-app.add_handler(CommandHandler("qrcode", qr_code))
+app.add_handler(CommandHandler("qrcode", qr_code)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("buttons", buttons))
+app.add_handler(CommandHandler("buttons", buttons)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("graph", graph))
+app.add_handler(CommandHandler("graph", graph)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("polgraph", polgraph))
+app.add_handler(CommandHandler("polgraph", polgraph)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("findphoto", findphoto))
+app.add_handler(CommandHandler("findphoto", findphoto)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("feedback", feedback))
+app.add_handler(CommandHandler("feedback", feedback)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("encrypt", encrypt))
+app.add_handler(CommandHandler("encrypt", encrypt)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("decrypt", decrypt))
+app.add_handler(CommandHandler("decrypt", decrypt)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("learn", learn))
+app.add_handler(CommandHandler("learn", learn)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("facedetect", facedetect))
+app.add_handler(CommandHandler("facedetect", facedetect)) #Creating handler for command with function
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
 app.run_polling()
 
 #:)
-
