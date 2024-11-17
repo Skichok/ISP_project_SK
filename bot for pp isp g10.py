@@ -16,6 +16,47 @@ import imageio
 import re
 from icrawler.builtin import GoogleImageCrawler
 
+
+def vigenere_encrypt(key, text):
+    encrypted_text = []
+    key = key.upper()
+    key_length = len(key)
+
+    for i, char in enumerate(text):
+        if char.isalpha():  # Проверяем, является ли символ буквой
+            is_upper = char.isupper()
+            shift = ord(key[i % key_length]) - ord('A')
+            base = ord('A') if is_upper else ord('a')
+
+            # Шифрование символа с учетом сдвига
+            encrypted_char = chr((ord(char) - base + shift) % 26 + base)
+            encrypted_text.append(encrypted_char)
+        else:
+            # Оставляем символ без изменений, если это не буква
+            encrypted_text.append(char)
+
+    return ''.join(encrypted_text)
+
+def vigenere_decrypt(key, text):
+    decrypted_text = []
+    key = key.upper()
+    key_length = len(key)
+
+    for i, char in enumerate(text):
+        if char.isalpha():  # Проверяем, является ли символ буквой
+            is_upper = char.isupper()
+            shift = ord(key[i % key_length]) - ord('A')
+            base = ord('A') if is_upper else ord('a')
+
+            # Дешифрование символа с учетом сдвига
+            decrypted_char = chr((ord(char) - base - shift) % 26 + base)
+            decrypted_text.append(decrypted_char)
+        else:
+            # Оставляем символ без изменений, если это не буква
+            decrypted_text.append(char)
+
+    return ''.join(decrypted_text)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -93,7 +134,7 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             file.write(f"[{current_time}] {user_id}: /list")
         print(f"File {file_name} created and logs saved.")
         
-    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n/findphoto [prompt] - Will send you a google picture.\n/feedback [text] - Please, write your feedback about the bot, or anything you would like us to add!\n\nOr you can send me picture, and I will reply what size it has in pixels!')
+    await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n/findphoto [prompt] - Will send you a google picture.\n/encrypt [key] [prompt] - Will encrypt prompt with key using Vigenere encryption\n/decrypt [key] [prompt] - Will decrypt prompt with key using Vigenere decryption\n/facedetect [photo of human] - Using a specially trained neural network, it crops a 640x640 photo (if the photo is larger, it will be cropped) to a persons face, if present.\n/learn [function without slash] - Will tell you about the functions operation and its implementation (for example: picture_size, encrypt)\n/feedback [text] - Please, write your feedback about the bot, or anything you would like us to add!\n\nOr you can send me picture, and I will reply what size it has in pixels!')
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print("Start")
@@ -460,6 +501,99 @@ async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f"Thank you for your feedback, {update.effective_user.first_name}!")
 
 
+async def encrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    user_name = update.effective_user.username  # Получаем имя пользователя
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    key = context.args[0] #Определяем ключ шифрования в отдельную переменную
+    prompt = " ".join(context.args[1:]) #Определяем текст, который мы хотим зашифровать
+    print(context.args)
+
+    log_file_name = f"User_data/{user_id}.txt"
+    if os.path.exists(log_file_name):
+        with open(log_file_name, 'a', encoding='utf-8') as log_file:
+            log_file.write(
+                f"\n[{current_time}] {user_id}: /encrypt {key} {prompt}")  #Логирование если такой файл уже есть
+        print(f"Logs added to {log_file_name}.")
+    else:
+        with open(log_file_name, 'w', encoding='utf-8') as log_file:
+            log_file.write(
+                f"[{current_time}] {user_id}: /encrypt {key} {prompt}")  #Логирование если такого файла нет
+        print(f"Logs added to {log_file_name}.")
+
+    await update.message.reply_text(f"This is what happened after the Vigenere encryption:\n{vigenere_encrypt(key, prompt)}")
+
+
+async def decrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    user_name = update.effective_user.username  # Получаем имя пользователя
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    key = context.args[0] #Определяем ключ шифрования в отдельную переменную
+    prompt = " ".join(context.args[1:]) #Определяем текст, который мы хотим зашифровать
+    print(context.args)
+
+    log_file_name = f"User_data/{user_id}.txt"
+    if os.path.exists(log_file_name):
+        with open(log_file_name, 'a', encoding='utf-8') as log_file:
+            log_file.write(
+                f"\n[{current_time}] {user_id}: /decrypt {key} {prompt}")  #Логирование если такой файл уже есть
+        print(f"Logs added to {log_file_name}.")
+    else:
+        with open(log_file_name, 'w', encoding='utf-8') as log_file:
+            log_file.write(
+                f"[{current_time}] {user_id}: /decrypt {key} {prompt}")  #Логирование если такого файла нет
+        print(f"Logs added to {log_file_name}.")
+
+    await update.message.reply_text(f"This is what happened after deciphering Vigenere:\n{vigenere_decrypt(key, prompt)}")
+
+
+async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    user_name = update.effective_user.username  # Получаем имя пользователя
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    print(context.args)
+    if context.args != []:
+        prompt = context.args[0]
+    else:
+        await update.message.reply_text(f"Sure! Just type /learn [FUNCTION WITHOUT SLASH]")
+
+    log_file_name = f"User_data/{user_id}.txt"
+    if os.path.exists(log_file_name):
+        with open(log_file_name, 'a', encoding='utf-8') as log_file:
+            log_file.write(
+                f"\n[{current_time}] {user_id}: /learn {prompt}")  #Логирование если такой файл уже есть
+        print(f"Logs added to {log_file_name}.")
+    else:
+        with open(log_file_name, 'w', encoding='utf-8') as log_file:
+            log_file.write(
+                f"[{current_time}] {user_id}: /learn {prompt}")  #Логирование если такого файла нет
+        print(f"Logs added to {log_file_name}.")
+
+    if prompt == "start" or prompt == "list" or prompt == "hello" or prompt == "buttons" or prompt == "feedback" or prompt == "learn":
+        await update.message.reply_text(f"This is a fairly simple function that does not use any additional features")
+    elif prompt == "qrcode":
+        await update.message.reply_text(f"This function uses an additional library in python, qrcode. It renders any prompt as a qrcode, after which we send you this image")
+    elif prompt == "graph" or prompt == "polgraph":
+        await update.message.reply_text(f"I'm so glad you asked about this function! It uses matplotlib and numpy libraries. We create 2 arrays, in one of which we take an independent variable, and the second we compose as a function of each element of the first array. After that we place the points on the coordinate plane, connect them, draw them and send them to you, our beloved users!")
+    elif prompt == "findphoto":
+        await update.message.reply_text(f"This function first processes your prompt, then parses the photo and sends the one that suits you")
+    elif prompt == "encrypt":
+        await update.message.reply_text(f"I'm so glad you asked about this function! This function uses a type of encryption and decryption called the Vigenère cipher. It is an example of a polyalphabetic cipher, in which each character of the text is encrypted using different shifts depending on the characters of the key.\n\nThe Vigenère cipher was invented in the 16th century and was considered unbroken for a long time because its resistance to frequency analysis is much higher than that of monoalphabetic ciphers (such as the Caesar cipher).\n\nThe encryption works like this:\nEach letter of the text is shifted a certain number of positions, depending on the corresponding letter of the key.\nFor example, if the text to be encrypted is HELLO and the key is KEY:\nThe letters of the key are repeated: KEYKE (so that the length matches the text).\nThe shifts are determined by the letters of the key: K = 10, E = 4, Y = 24 (counting from A).\nThe letters of the text are shifted:\nH (shift 10) -> R\nE (shift 4) -> I\nL (shift 24) -> J\nand so on")
+    elif prompt == "decrypt":
+        await update.message.reply_text(f"I'm so glad you asked about this function! This function uses a type of encryption and decryption called the Vigenère cipher. It is an example of a polyalphabetic cipher, in which each character of the text is encrypted using different shifts depending on the characters of the key.\n\nThe Vigenère cipher was invented in the 16th century and was considered unbroken for a long time because its resistance to frequency analysis is much higher than that of monoalphabetic ciphers (such as the Caesar cipher).\n\nDecryption occurs as follows:\nTo decrypt the text, each character is shifted back by the number of positions determined by the corresponding letter of the key.\nFor example, to decrypt the cipher RIJVS with the key KEY:\nDecrypt each letter using the reverse shift determined by the key:\nR (shift -10) -> H\nI (shift -4) -> E\nand so on")
+    elif prompt == "facedetect":
+        await update.message.reply_text(f"This feature uses a specially trained model that segments the photo, then crops it based on the segmentation and sends you back only the person's face")
+    elif prompt == "picture_size":
+        await update.message.reply_text(f"This function downloads the image, analyzes it, records the resolution, and then we return it to you.")
+    else:
+        await update.message.reply_text(f"Sorry, there is no such function in the bot. Perhaps you made a typo, or are looking for a non-existent function")
+
+async def facedetect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(f"This feature is currently under development and will be added very soon. We will be waiting for you soon!")
+
 app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build()
 
 app.add_handler(CommandHandler("hello", hello))
@@ -483,6 +617,14 @@ app.add_handler(CommandHandler("polgraph", polgraph))
 app.add_handler(CommandHandler("findphoto", findphoto))
 
 app.add_handler(CommandHandler("feedback", feedback))
+
+app.add_handler(CommandHandler("encrypt", encrypt))
+
+app.add_handler(CommandHandler("decrypt", decrypt))
+
+app.add_handler(CommandHandler("learn", learn))
+
+app.add_handler(CommandHandler("facedetect", facedetect))
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
