@@ -1,10 +1,10 @@
 import math
 import telegram
-#import requests
+import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from PIL import Image
+from PIL import Image, ImageDraw
 import io
 import os
 from datetime import datetime #for datestamp
@@ -15,7 +15,68 @@ import sympy as sp #to parse mathematical expressions
 import imageio
 import re
 from icrawler.builtin import GoogleImageCrawler #to parse photoes
+from math import floor
 
+SERVER_URL = "http://89.223.125.229/predict" #server with AI,
+
+def resize_image(image, target_size=(640, 640)):
+    """
+    Изменяет размер изображения до указанного размера (по умолчанию 640x640).
+    Возвращает преобразованное изображение и масштабирование (scale_x, scale_y).
+    """
+    original_size = image.size
+    img_resized = image.resize(target_size, Image.Resampling.LANCZOS)
+    scale_x = target_size[0] / original_size[0]
+    scale_y = target_size[1] / original_size[1]
+    return img_resized, (scale_x, scale_y)
+
+def draw_boxes_on_image(image, boxes, scale_factors):
+    """
+    Отображает исходное изображение с пересчитанными координатами.
+    """
+    draw = ImageDraw.Draw(image)
+    scale_x, scale_y = scale_factors
+    res = []
+    for box in boxes:
+        # Пересчет координат с учетом масштабирования
+        x1, y1, x2, y2 = [box[0] / scale_x, box[1] / scale_y, box[2] / scale_x, box[3] / scale_y]
+        res.append([x1, y1, x2, y2])
+#        draw.rectangle([x1, y1, x2, y2], outline="red", width=3)
+    return res
+#    return image
+
+def send_image(img):
+    """
+    Отправляет изображение на сервер FastAPI после изменения размера.
+    """
+    original_image = img.copy()
+    resized_image, scale_factors = resize_image(img)
+
+    # Преобразуем изображение в байтовый поток
+    img_byte_arr = io.BytesIO()
+    resized_image.save(img_byte_arr, format='JPEG')
+    img_byte_arr.seek(0)
+
+    # Отправляем изображение на сервер
+    files = {"file": ("resized_image.jpg", img_byte_arr, "image/jpeg")}
+    response = requests.post(SERVER_URL, files=files)
+
+    # Обрабатываем ответ
+    if response.status_code == 200:
+        result = response.json()
+        boxes = result["boxes"]
+        print("Координаты сегментов (640x640):", boxes)
+
+        # Визуализация исходного изображения с пересчитанными координатами
+#        image_with_boxes = draw_boxes_on_image(original_image, boxes, scale_factors)
+#        plt.figure(figsize=(8, 8))
+#        plt.imshow(image_with_boxes)
+#        plt.axis("off")
+#        plt.show()
+#        print(boxes)
+        return draw_boxes_on_image(original_image, boxes, scale_factors)
+    else:
+        print(f"Ошибка {response.status_code}: {response.json()}")
 
 def vigenere_encrypt(key, text): #function to encrypt text with key
     encrypted_text = []
@@ -74,6 +135,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         with open(file_name, 'w') as file:
             file.write(f"[{current_time}] {user_id}: /start")
         print(f"File {file_name} created and logs saved.")
+
+
         
     await update.message.reply_text(f'Hello {update.effective_user.first_name}!\nI am a smart chat-bot!\nList of commands: /list')
 
@@ -137,7 +200,7 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text('Of course, here is the list of commands:\n/start - starts the bot\n/list - list of commands\n/hello - The bot responds with hello and your name in Telegram\n/buttons - you will get a buttons\n/qrcode [prompt] - Sends back to you QR code for yours prompt\n/graph [function] - you can send function and bot will send back graph of this function! (For example: 2x-3, sin(x), x^2)\n/polgraph [function] - you can send function and bot will send back graph of this function! (For example: r, sin(r), abs(r), or if you want a graph of heart: 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))\n/findphoto [prompt] - Will send you a google picture.\n/encrypt [key] [prompt] - Will encrypt prompt with key using Vigenere encryption\n/decrypt [key] [prompt] - Will decrypt prompt with key using Vigenere decryption\n/facedetect [photo of human] - Using a specially trained neural network, it crops a 640x640 photo (if the photo is larger, it will be cropped) to a persons face, if present.\n/learn [function without slash] - Will tell you about the functions operation and its implementation (for example: picture_size, encrypt)\n/feedback [text] - Please, write your feedback about the bot, or anything you would like us to add!\n\nOr you can send me picture, and I will reply what size it has in pixels!')
 
 async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    print("Start")
+    print("photo_received")
     user_id = update.effective_user.id
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -167,12 +230,29 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     # Load the image using PIL
     image = Image.open(io.BytesIO(photo_data))
     width, height = image.size
-
+    boxes = send_image(image)
     file_name = f"User_photo/file_{user_id}_{unique_timestamp}.jpg"  # Unique filename based on file_id
     image.save(file_name)
 
+    await update.message.reply_text(f'The photo size is {width}x{height} pixels.') #Sending back to user size of photo
+
+    for element in boxes:
+        # Округляем координаты вниз
+        element = map(floor, element)
+        print(element)
+        cropped_image = image.crop(tuple(element))  # Обрезаем изображение
+
+        # Сохраняем обрезанное изображение во временный буфер
+        with io.BytesIO() as output:
+            cropped_image.save(output, format="JPEG")  # Сохраняем как JPEG
+            output.seek(0)  # Возвращаемся в начало потока
+
+            # Отправляем обрезанное изображение пользователю
+            await context.bot.send_photo(chat_id=update.effective_chat.id, photo=output)
+    if boxes == []:
+        await update.message.reply_text(f'No human recognized')
+
     # Send the dimensions back to the user
-    await update.message.reply_text(f'The photo size is {width}x{height} pixels.')
 
 async def qr_code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
@@ -591,8 +671,11 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         await update.message.reply_text(f"Sorry, there is no such function in the bot. Perhaps you made a typo, or are looking for a non-existent function")
     #Find out the function the user wants to know about and send a suitable response
+
+'''
 async def facedetect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f"This feature is currently under development and will be added very soon. We will be waiting for you soon!")
+'''
 
 app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build() #Connecting to the bot using token
 
@@ -624,7 +707,7 @@ app.add_handler(CommandHandler("decrypt", decrypt)) #Creating handler for comman
 
 app.add_handler(CommandHandler("learn", learn)) #Creating handler for command with function
 
-app.add_handler(CommandHandler("facedetect", facedetect)) #Creating handler for command with function
+#app.add_handler(CommandHandler("facedetect", facedetect)) #Creating handler for command with function
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
