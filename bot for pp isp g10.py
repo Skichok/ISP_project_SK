@@ -21,8 +21,8 @@ SERVER_URL = "http://89.223.125.229/predict" #server with AI,
 
 def resize_image(image, target_size=(640, 640)):
     """
-    Изменяет размер изображения до указанного размера (по умолчанию 640x640).
-    Возвращает преобразованное изображение и масштабирование (scale_x, scale_y).
+    Resizes the image to the specified size (default 640x640).
+    Returns the transformed image and the scale (scale_x, scale_y).
     """
     original_size = image.size
     img_resized = image.resize(target_size, Image.Resampling.LANCZOS)
@@ -32,13 +32,13 @@ def resize_image(image, target_size=(640, 640)):
 
 def draw_boxes_on_image(image, boxes, scale_factors):
     """
-    Отображает исходное изображение с пересчитанными координатами.
+    Displays the original image with recalculated coordinates.
     """
     draw = ImageDraw.Draw(image)
     scale_x, scale_y = scale_factors
     res = []
     for box in boxes:
-        # Пересчет координат с учетом масштабирования
+        # Recalculation of coordinates taking into account scaling
         x1, y1, x2, y2 = [box[0] / scale_x, box[1] / scale_y, box[2] / scale_x, box[3] / scale_y]
         res.append([x1, y1, x2, y2])
 #        draw.rectangle([x1, y1, x2, y2], outline="red", width=3)
@@ -47,27 +47,27 @@ def draw_boxes_on_image(image, boxes, scale_factors):
 
 def send_image(img):
     """
-    Отправляет изображение на сервер FastAPI после изменения размера.
+    Sends an image to the FastAPI server after resizing.
     """
     original_image = img.copy()
     resized_image, scale_factors = resize_image(img)
 
-    # Преобразуем изображение в байтовый поток
+    # Convert an image to a byte stream
     img_byte_arr = io.BytesIO()
     resized_image.save(img_byte_arr, format='JPEG')
     img_byte_arr.seek(0)
 
-    # Отправляем изображение на сервер
+    # Sending the image to the server
     files = {"file": ("resized_image.jpg", img_byte_arr, "image/jpeg")}
     response = requests.post(SERVER_URL, files=files)
 
-    # Обрабатываем ответ
+    # Processing the response
     if response.status_code == 200:
         result = response.json()
         boxes = result["boxes"]
-        print("Координаты сегментов (640x640):", boxes)
+        print("Segment coordinates (640x640): ", boxes)
 
-        # Визуализация исходного изображения с пересчитанными координатами
+        # Visualization of the original image with recalculated coordinates
 #        image_with_boxes = draw_boxes_on_image(original_image, boxes, scale_factors)
 #        plt.figure(figsize=(8, 8))
 #        plt.imshow(image_with_boxes)
@@ -76,7 +76,7 @@ def send_image(img):
 #        print(boxes)
         return draw_boxes_on_image(original_image, boxes, scale_factors)
     else:
-        print(f"Ошибка {response.status_code}: {response.json()}")
+        print(f"Error {response.status_code}: {response.json()}")
 
 def vigenere_encrypt(key, text): #function to encrypt text with key
     encrypted_text = []
