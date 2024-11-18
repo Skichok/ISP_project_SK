@@ -2,3 +2,6 @@ python-telegram-bot
 pillow
 qrcode
 matplotlib
+sympy
+imageio
+icrawler
