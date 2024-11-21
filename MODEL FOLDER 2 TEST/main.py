@@ -27,8 +27,11 @@ async def predict(file: UploadFile = File(...)):
     print("Start")
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Invalid image format. Only JPEG and PNG are supported.")
+    print(1)
     contents = await file.read()
+    print(2)
     image = Image.open(io.BytesIO(contents))
+    print(3)
 
     if image.size != EXPECTED_SIZE:
         raise HTTPException(status_code=400, detail=f"Invalid image size. Expected {EXPECTED_SIZE}, got {image.size}.")
