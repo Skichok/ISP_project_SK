@@ -18,7 +18,7 @@ from icrawler.builtin import GoogleImageCrawler #to parse photoes
 from math import floor
 
 #SERVER_URL = "http://89.223.125.229/predict" #server with AI,
-SERVER_URL = "http://localhost:8000/predict"
+SERVER_URL = "http://localhost:8000/predict" #if docker container with function exists
 
 def resize_image(image, target_size=(640, 640)):
     """
