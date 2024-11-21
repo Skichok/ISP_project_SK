@@ -384,3 +384,27 @@
 [2024-11-21 20:24:49] 1130761632: /findphoto ['group', 'of', 'people'] [USER GOT foundphoto_ne_sprashival_20241121.jpg]
 [2024-11-21 20:25:11] 1130761632: /findphoto ['trump'] [USER GOT foundphoto_ne_sprashival_20241121.jpg]
 [2024-11-21 20:25:20] 1130761632 sent a photo file_1130761632_20241121202520226662
+[2024-11-21 21:39:49] 1130761632: /list
+[2024-11-21 21:39:54] 1130761632: /start
+[2024-11-21 21:39:56] 1130761632: /buttons
+[2024-11-21 21:39:58] 1130761632 used button 2
+[2024-11-21 21:40:09] 1130761632: /qrcode sasa [USER GOT qr_1130761632_20241121214009960742.png]
+[2024-11-21 21:40:22] 1130761632: /graph 2x^2
+[2024-11-21 21:42:04] 1130761632: /graph 2x^2
+[2024-11-21 21:42:27] 1130761632: /polgraph 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4)))
+[2024-11-21 21:42:31] 1130761632: /polgraph 2-2*sin(r)+sin(r)*(sqrt(abs(cos(r)))/(sin(r)+1.4))
+[2024-11-21 21:42:53] 1130761632: /findphoto ['mac', 'royal', 'deluxe'] [USER GOT foundphoto_ne_sprashival_20241121.jpg]
+[2024-11-21 21:43:04] 1130761632: /findphoto ['banana'] [USER GOT foundphoto_ne_sprashival_20241121.jpg]
+[2024-11-21 21:43:22] 1130761632: /findphoto ['артемий', 'лебедев'] [USER GOT foundphoto_ne_sprashival_20241121.jpg]
+[2024-11-21 21:43:57] 1130761632: /encrypt megathrone arseniy gay
+[2024-11-21 21:44:13] 1130761632: /decrypt megathrone mvyegpp tek
+[2024-11-21 21:44:43] 1130761632 sent a photo file_1130761632_20241121214443286574
+[2024-11-21 21:44:51] 1130761632 sent a photo file_1130761632_20241121214451239212
+[2024-11-21 21:45:00] 1130761632 sent a photo file_1130761632_20241121214500249017
+[2024-11-21 21:45:51] 1130761632: /learn facedetect
+[2024-11-21 21:46:03] 1130761632: /learn decrypt
+[2024-11-21 21:46:25] 1130761632 sent a photo file_1130761632_20241121214625666020
+[2024-11-21 21:50:00] 1130761632: /start
+[2024-11-21 21:50:01] 1130761632: /list
+[2024-11-21 21:50:15] 1130761632: /learn picture_size
+[2024-11-21 21:50:22] 1130761632: /learn picture_size
