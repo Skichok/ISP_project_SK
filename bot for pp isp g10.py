@@ -237,6 +237,11 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await update.message.reply_text(f'The photo size is {width}x{height} pixels.') #Sending back to user size of photo
 
+    if boxes == []:
+        await update.message.reply_text(f'No human recognized')
+    else:
+        await update.message.reply_text(f'I found {len(boxes)} person(s) here.')
+
     for element in boxes:
         # Округляем координаты вниз
         element = map(floor, element)
@@ -250,8 +255,7 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
             # Отправляем обрезанное изображение пользователю
             await context.bot.send_photo(chat_id=update.effective_chat.id, photo=output)
-    if boxes == []:
-        await update.message.reply_text(f'No human recognized')
+
 
     # Send the dimensions back to the user
 
