@@ -23,11 +23,11 @@ SERVER_URL = "http://localhost:8000/predict" #if docker container with function 
 
 
 def user_sqlinform(user, user_id):
-    # Установить соединение с базой данных (создаст файл, если его нет)
+    # Connection to data base (creates a file if it doesn't exist)
     conn = sqlite3.connect("User_data/users.db")
     cursor = conn.cursor()
 
-    # Создать таблицу, если она не существует
+    # Creates table, if it doesn't exist
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,51 +36,51 @@ def user_sqlinform(user, user_id):
     )
     """)
 
-    # Вставить данные в таблицу
+    # Put data in table
     try:
         cursor.execute("INSERT INTO users (username, user_id) VALUES (?, ?)", (user, user_id))
         conn.commit()
-        print(f"Пользователь {user} с ID {user_id} добавлен в базу данных.")
+        print(f"User {user} with ID {user_id} have been added to data base.")
     except sqlite3.IntegrityError:
-        print(f"Пользователь с ID {user_id} уже существует в базе данных.")
+        print(f"User with ID {user_id} already exist's in database.")
 
-    # Закрыть соединение
+    # close connection
     conn.close()
 
 
 def get_user_id_by_username(username):
-    # Подключение к базе данных
+    # connection to database
     conn = sqlite3.connect("User_data/users.db")
     cursor = conn.cursor()
 
     # Выполнение SQL-запроса
     cursor.execute("SELECT user_id FROM users WHERE username = ?", (username,))
-    result = cursor.fetchone()  # Получение одной записи
+    result = cursor.fetchone()  # Getting one data
 
-    # Закрытие соединения
+    # closing connection
     conn.close()
 
-    # Возвращаем ID пользователя, если он найден
+    # returning ID of user, if it exists
     if result:
         return result[0]
     else:
-        print(f"Пользователь с именем '{username}' не найден.")
+        print(f"User with username '{username}' doesn't exist.")
         return None
 
 
 def get_all_users():
-    # Подключение к базе данных
+    # Connecting to database
     conn = sqlite3.connect("User_data/users.db")
     cursor = conn.cursor()
 
-    # Выполнение SQL-запроса для получения всех пользователей
+    # Execute SQL Query to Get All Users
     cursor.execute("SELECT username FROM users")
-    results = cursor.fetchall()  # Получить все записи в виде списка кортежей
+    results = cursor.fetchall()  # Get all records as a list of tuples
 
-    # Закрытие соединения
+    # Closing connection
     conn.close()
 
-    # Преобразование списка кортежей в список строк
+    # Convert a list of tuples to a list of strings
     users = [row[0] for row in results]
     return users
 
