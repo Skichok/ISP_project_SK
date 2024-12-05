@@ -16,6 +16,7 @@ import imageio
 import re
 from icrawler.builtin import GoogleImageCrawler #to parse photoes
 from math import floor
+import sqlite3
 
 #SERVER_URL = "http://89.223.125.229/predict" #server with AI,
 SERVER_URL = "http://localhost:8000/predict" #if docker container with function exists
