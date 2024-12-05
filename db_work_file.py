@@ -1,0 +1,91 @@
+import math
+import telegram
+import requests
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from PIL import Image, ImageDraw
+import io
+import os
+from datetime import datetime #for datestamp
+import qrcode #to create qrcode
+import matplotlib.pyplot as plt #to create graphs
+import numpy as np #to create graphs
+import sympy as sp #to parse mathematical expressions
+import imageio
+import re
+from icrawler.builtin import GoogleImageCrawler #to parse photoes
+from math import floor
+import sqlite3
+
+def user_sqlinform(user, user_id):
+    # Установить соединение с базой данных (создаст файл, если его нет)
+    conn = sqlite3.connect("User_data/users.db")
+    cursor = conn.cursor()
+
+    # Создать таблицу, если она не существует
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        user_id INTEGER NOT NULL UNIQUE
+    )
+    """)
+
+    # Вставить данные в таблицу
+    try:
+        cursor.execute("INSERT INTO users (username, user_id) VALUES (?, ?)", (user, user_id))
+        conn.commit()
+        print(f"Пользователь {user} с ID {user_id} добавлен в базу данных.")
+    except sqlite3.IntegrityError:
+        print(f"Пользователь с ID {user_id} уже существует в базе данных.")
+
+    # Закрыть соединение
+    conn.close()
+
+
+def get_user_id_by_username(username):
+    # Подключение к базе данных
+    conn = sqlite3.connect("User_data/users.db")
+    cursor = conn.cursor()
+
+    # Выполнение SQL-запроса
+    cursor.execute("SELECT user_id FROM users WHERE username = ?", (username,))
+    result = cursor.fetchone()  # Получение одной записи
+
+    # Закрытие соединения
+    conn.close()
+
+    # Возвращаем ID пользователя, если он найден
+    if result:
+        return result[0]
+    else:
+        print(f"Пользователь с именем '{username}' не найден.")
+        return None
+
+
+def get_all_users():
+    # Подключение к базе данных
+    conn = sqlite3.connect("User_data/users.db")
+    cursor = conn.cursor()
+
+    # Выполнение SQL-запроса для получения всех пользователей
+    cursor.execute("SELECT username FROM users")
+    results = cursor.fetchall()  # Получить все записи в виде списка кортежей
+
+    # Закрытие соединения
+    conn.close()
+
+    # Преобразование списка кортежей в список строк
+    users = [row[0] for row in results]
+    return users
+
+all_users = get_all_users()
+print("All users:", all_users)
+
+for usernome in all_users:
+    user_id = get_user_id_by_username(usernome)
+    if user_id is not None:
+        print(f"ID of user '{usernome}': {user_id}")
+    else:
+        print(f"user {usernome} doesn't exists")

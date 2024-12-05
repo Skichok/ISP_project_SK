@@ -192,7 +192,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     usernome = update.effective_user.username
     user_sqlinform(usernome, user_id)
 
-    # test of getting user_id by username
+    # getting user_id by username
     user_idi = get_user_id_by_username(usernome)
     if user_idi is not None:
         print(f"ID of user '{usernome}': {user_idi}")
