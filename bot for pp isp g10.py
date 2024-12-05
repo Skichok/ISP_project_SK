@@ -53,7 +53,7 @@ def get_user_id_by_username(username):
     conn = sqlite3.connect("User_data/users.db")
     cursor = conn.cursor()
 
-    # Выполнение SQL-запроса
+    # Executing a SQL query
     cursor.execute("SELECT user_id FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()  # Getting one data
 
