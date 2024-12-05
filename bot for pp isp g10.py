@@ -199,6 +199,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     else:
         print(f"user {usernome} doesn't exists")
     # Check if the file exists
+
     if os.path.exists(file_name):
     # If file exists, append the new numbers to a new line
         with open(file_name, 'a') as file:
@@ -219,6 +220,15 @@ async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
 
     # Check if the file exists
     if os.path.exists(file_name):
@@ -238,6 +248,15 @@ async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
 
     # Check if the file exists
     if os.path.exists(file_name):
@@ -258,6 +277,16 @@ async def list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     # Check if the file exists
     if os.path.exists(file_name):
@@ -279,6 +308,16 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     # Check if the file exists
     if os.path.exists(file_name):
@@ -338,6 +377,16 @@ async def qr_code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
     user_prompt = (update.message.text)[8:]
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     # Check if the file exists
     if os.path.exists(file_name):
@@ -366,6 +415,15 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
 
     # Log the command usage
     if os.path.exists(file_name):
@@ -445,6 +503,16 @@ async def graph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     # Log the command usage
     expression_text = ' '.join(context.args)  # Get the expression from the command arguments
@@ -513,6 +581,15 @@ async def polgraph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     file_name = f"User_data/{user_id}.txt"
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
 
     # Log the command usage
     expression_text = ' '.join(context.args)  # Get the expression from the command arguments
@@ -578,6 +655,16 @@ async def findphoto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     username = update.effective_user.username
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     datestamp = datetime.now().strftime("%Y%m%d")
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     # Log command usage
     file_name = f"User_data/{user_id}.txt"
@@ -630,6 +717,16 @@ async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     feedback_text = ' '.join(context.args)  # Feedback text (after the command)
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     if not feedback_text:
         await update.message.reply_text(
@@ -667,6 +764,16 @@ async def encrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     key = context.args[0] #Define the encryption key in a separate variable
     prompt = " ".join(context.args[1:]) #Define the text we want to encrypt
     print(context.args)
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     log_file_name = f"User_data/{user_id}.txt"
     if os.path.exists(log_file_name):
@@ -691,6 +798,16 @@ async def decrypt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     key = context.args[0] #Define the encryption key in a separate variable
     prompt = " ".join(context.args[1:]) #Define the text we want to encrypt
     print(context.args)
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
 
     log_file_name = f"User_data/{user_id}.txt"
     if os.path.exists(log_file_name):
@@ -713,6 +830,16 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     print(context.args)
+    usernome = update.effective_user.username
+    user_sqlinform(usernome, user_id)
+
+    # getting user_id by username
+    user_idi = get_user_id_by_username(usernome)
+    if user_idi is not None:
+        print(f"ID of user '{usernome}': {user_idi}")
+    else:
+        print(f"user {usernome} doesn't exists")
+
     if context.args != []:
         prompt = context.args[0]
     else:
