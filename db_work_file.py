@@ -89,3 +89,36 @@ for usernome in all_users:
         print(f"ID of user '{usernome}': {user_id}")
     else:
         print(f"user {usernome} doesn't exists")
+print(type(user_id))
+
+otd = input("Do you want to add users manualy? (y/n): ")
+
+if otd == "y":
+    print("To finish write 'FINISH'")
+    usernime = input("Write username: ")
+    if usernime == "FINISH":
+        pass
+    else:
+        usor_idi = input("Write user id: ")
+    while usernime != "FINISH" and usor_idi != "FINISH":
+        usor_idi = int(usor_idi)
+        user_sqlinform(usernime, usor_idi)
+        print("Success")
+        usernime = input("Write username: ")
+        if usernime == "FINISH":
+            break
+        usor_idi = input("Write user id: ")
+    print("OK, here is new database:")
+    all_users = get_all_users()
+    print("All users:", all_users)
+
+    for usernome in all_users:
+        user_id = get_user_id_by_username(usernome)
+        if user_id is not None:
+            print(f"ID of user '{usernome}': {user_id}")
+        else:
+            print(f"user {usernome} doesn't exists")
+
+
+else:
+    print("Program finished")
