@@ -18,12 +18,12 @@ from icrawler.builtin import GoogleImageCrawler #to parse photoes
 from math import floor
 import sqlite3
 
-def user_sqlinform(user, user_id):
-    # Connection to data base (creates a file if it doesn't exist)
+def user_sqlinform(user, user_id, action="ADD"):
+    # Connection to the database (creates a file if it doesn't exist)
     conn = sqlite3.connect("User_data/users.db")
     cursor = conn.cursor()
 
-    # Creates table, if it doesn't exist
+    # Creates table if it doesn't exist
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,15 +32,28 @@ def user_sqlinform(user, user_id):
     )
     """)
 
-    # Put data in table
-    try:
-        cursor.execute("INSERT INTO users (username, user_id) VALUES (?, ?)", (user, user_id))
-        conn.commit()
-        print(f"User {user} with ID {user_id} have been added to data base.")
-    except sqlite3.IntegrityError:
-        print(f"User with ID {user_id} already exist's in database.")
+    if action == "ADD":
+        # Add data to the table
+        try:
+            cursor.execute("INSERT INTO users (username, user_id) VALUES (?, ?)", (user, user_id))
+            conn.commit()
+            print(f"User {user} with ID {user_id} has been added to the database.")
+        except sqlite3.IntegrityError:
+            print(f"User with ID {user_id} already exists in the database.")
 
-    # close connection
+    elif action == "REMOVE":
+        # Remove user from the table
+        cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+        conn.commit()
+        if cursor.rowcount > 0:
+            print(f"User with ID {user_id} has been removed from the database.")
+        else:
+            print(f"User with ID {user_id} does not exist in the database.")
+
+    else:
+        print("Invalid action. Use 'ADD' to add a user or 'REMOVE' to delete a user.")
+
+    # Close the connection
     conn.close()
 
 
@@ -104,6 +117,38 @@ if otd == "y":
     while usernime != "FINISH" and usor_idi != "FINISH":
         usor_idi = int(usor_idi)
         user_sqlinform(usernime, usor_idi)
+        print("Success")
+        usernime = input("Write username: ")
+        if usernime == "FINISH":
+            break
+        usor_idi = input("Write user id: ")
+    print("OK, here is new database:")
+    all_users = get_all_users()
+    print("All users:", all_users)
+
+    for usernome in all_users:
+        user_id = get_user_id_by_username(usernome)
+        if user_id is not None:
+            print(f"ID of user '{usernome}': {user_id}")
+        else:
+            print(f"user {usernome} doesn't exists")
+
+
+else:
+    pass
+
+otd = input("Do you want to remove users manualy? (y/n): ")
+
+if otd == "y":
+    print("To finish write 'FINISH'")
+    usernime = input("Write username: ")
+    if usernime == "FINISH":
+        pass
+    else:
+        usor_idi = input("Write user id: ")
+    while usernime != "FINISH" and usor_idi != "FINISH":
+        usor_idi = int(usor_idi)
+        user_sqlinform(usernime, usor_idi, "REMOVE")
         print("Success")
         usernime = input("Write username: ")
         if usernime == "FINISH":
