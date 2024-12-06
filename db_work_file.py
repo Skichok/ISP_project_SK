@@ -82,7 +82,7 @@ def get_all_users():
 
 
 all_users = get_all_users()
-print("All users:", all_users)
+print("All users:", " | ".join(all_users))
 
 for usernome in all_users:
     user_id = get_user_id_by_username(usernome)
