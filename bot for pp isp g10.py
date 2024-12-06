@@ -20,7 +20,8 @@ import sqlite3
 
 #SERVER_URL = "http://89.223.125.229/predict" #server with AI,
 SERVER_URL = "http://localhost:8000/predict" #if docker container with function exists
-
+ADMIN_USER_ID = 1130761632  # ID of telegram account
+ADMIN_USERNAME = "ne_sprashival" # Username of telegram account
 
 def user_sqlinform(user, user_id):
     # Connection to data base (creates a file if it doesn't exist)
@@ -882,6 +883,39 @@ async def facedetect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     await update.message.reply_text(f"This feature is currently under development and will be added very soon. We will be waiting for you soon!")
 '''
 
+async def admin_check(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.effective_user.id
+    username = update.effective_user.username
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    log_file_name = f"User_data/{user_id}.txt"
+    if os.path.exists(log_file_name):
+        with open(log_file_name, 'a', encoding='utf-8') as log_file:
+            log_file.write(
+                f"\n[{current_time}] {user_id}: /getusers [ADMIN ONLY COMMAND]")  #Logging if such a file already exists
+        print(f"Logs added to {log_file_name}.")
+    else:
+        with open(log_file_name, 'w', encoding='utf-8') as log_file:
+            log_file.write(
+                f"[{current_time}] {user_id}: /getusers [ADMIN ONLY COMMAND]")  #Logging if there is no such file
+        print(f"Logs added to {log_file_name}.")
+
+    # Check if the user is an admin
+    if user_id == ADMIN_USER_ID and username == ADMIN_USERNAME:
+        # Check if the database file exists
+        db_file = "User_data/users.db"
+        if os.path.exists(db_file):
+            await context.bot.send_document(chat_id=update.effective_chat.id, document=open(db_file, 'rb'))
+            print(f"Admin {username} accessed the database file.")
+        else:
+            await update.message.reply_text("Database file not found.")
+            print(f"Database file '{db_file}' not found.")
+    else:
+        await update.message.reply_text("This function is for admins only.")
+        print(f"Unauthorized access attempt by user {username} (ID: {user_id}).")
+
+
+
 user_sqlinform("testuser", 12)
 
 # test of getting user_id by username
@@ -934,6 +968,8 @@ app.add_handler(CommandHandler("decrypt", decrypt)) #Creating handler for comman
 app.add_handler(CommandHandler("learn", learn)) #Creating handler for command with function
 
 #app.add_handler(CommandHandler("facedetect", facedetect)) #Creating handler for command with function
+
+app.add_handler(CommandHandler("getusers", admin_check))
 
 app.add_handler(CallbackQueryHandler(button_callback))
 
