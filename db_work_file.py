@@ -167,4 +167,6 @@ if otd == "y":
 
 
 else:
-    print("Program finished")
+    pass
+
+print("Program finished")
