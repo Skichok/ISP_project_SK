@@ -937,8 +937,8 @@ else:
 all_users = get_all_users()
 print("All users:", all_users)
 
-app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build() #Connecting to the bot using token
-
+#app = ApplicationBuilder().token("7332049578:AAE5V5jZbLgfPXiLzJoyqZ8cXViNmi3Y0Sk").build() #Connecting to the bot using token
+app = ApplicationBuilder().token("7539063885:AAGayqU81bbGmUxkdvh0m8bw9Byf4edn0Xs").build() #Connecting to the bot using token
 app.add_handler(CommandHandler("hello", hello)) #Creating handler for command with function
 
 app.add_handler(CommandHandler("ping", ping)) #Creating handler for command with function
