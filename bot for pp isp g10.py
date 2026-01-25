@@ -10,7 +10,7 @@ import os
 from datetime import datetime #for datestamp
 import qrcode #to create qrcode
 import matplotlib.pyplot as plt #to create graphs
-import numpy as np #to create graphs
+import numpy as np #to create graphs°
 import sympy as sp #to parse mathematical expressions
 import imageio
 import re
@@ -497,85 +497,63 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             print(f"Logs added to {file_name}.")
             
         await query.edit_message_text(text="You pressed button 3!")
+from plot_local import plot_expression   # <<< ВАЖНО: импорт функции
 
 async def graph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
-    username = update.effective_user.username
+    username = update.effective_user.username or "unknown"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    unique_timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+
     file_name = f"User_data/{user_id}.txt"
-    usernome = update.effective_user.username
-    user_sqlinform(usernome, user_id)
+    os.makedirs("User_data", exist_ok=True)
 
-    # getting user_id by username
-    user_idi = get_user_id_by_username(usernome)
-    if user_idi is not None:
-        print(f"ID of user '{usernome}': {user_idi}")
-    else:
-        print(f"user {usernome} doesn't exists")
+    # --- Получение выражения ---
+    expression_text = " ".join(context.args).strip()
 
+    if not expression_text:
+        await update.message.reply_text(
+            "Введите функцию после команды.\n"
+            "Пример: /graph sin(x) + ln(x)"
+        )
+        return
 
-    # Log the command usage
-    expression_text = ' '.join(context.args)  # Get the expression from the command arguments
-
-    # Append log entry
+    # --- Логирование ---
     if os.path.exists(file_name):
-        with open(file_name, 'a') as file:
+        with open(file_name, "a", encoding="utf-8") as file:
             file.write(f"\n[{current_time}] {user_id}: /graph {expression_text}")
-        print(f"Logs added to {file_name}.")
     else:
-        with open(file_name, 'w') as file:
+        with open(file_name, "w", encoding="utf-8") as file:
             file.write(f"[{current_time}] {user_id}: /graph {expression_text}")
-        print(f"File {file_name} created and logs saved.")
 
-    # Insert '*' between numbers and variables (e.g., convert '2x' to '2*x')
-    expression_text = re.sub(r'(?<=[0-9])(?=[a-zA-Z])', '*', expression_text)
-
-    # Parse the expression
+    # --- Построение графика ---
     try:
-        x = sp.symbols('x')  # Define the symbol 'x'
-        expression = sp.sympify(expression_text)  # Parse the expression
-    except (sp.SympifyError, ValueError):
-        await update.message.reply_text("Invalid mathematical expression. Please try again.")
+        graph_filename = plot_expression(expression_text)
+    except ValueError:
+        await update.message.reply_text(
+            "❌ Неверное математическое выражение.\n"
+            "Пример: sin(x), x^2 - 3*x + 1, 1/x"
+        )
         return
-
-    # Generate values for x and evaluate y based on the expression
-    x_values = np.linspace(-10, 10, 400)
-    try:
-        # Use lambdify to convert sympy expression to a function that numpy can understand
-        y_values = sp.lambdify(x, expression, "numpy")(x_values)
     except Exception as e:
-        await update.message.reply_text("Error evaluating the expression. Please check the function syntax.")
+        print("Ошибка при построении графика:", e)
+        await update.message.reply_text(
+            "⚠️ Ошибка при построении графика. Попробуйте другую функцию."
+        )
         return
 
-    # Plot the function with a dark theme
-    plt.figure(facecolor='black')  # Set the figure background color
-    plt.plot(x_values, y_values, color='cyan', label=f'y = {expression_text}')  # Plot in cyan color
-
-    # Add coordinate axes
-    plt.axhline(0, color='white', linewidth=0.8)  # x-axis in white
-    plt.axvline(0, color='white', linewidth=0.8)  # y-axis in white
-
-    # Title and labels with white color for visibility on dark background
-    plt.title(f'Graph of y = {expression_text}', color='white')
-    plt.xlabel('x', color='white')
-    plt.ylabel('y', color='white')
-
-    # Additional plot formatting
-    plt.grid(True, color='gray')  # Set gridlines to gray
-    plt.legend(facecolor='black', edgecolor='white', labelcolor='white', loc='upper right')  # Legend with white text
-    plt.gca().set_facecolor("black")  # Set the axes background color to black
-    plt.tick_params(colors='white')  # Set the tick labels color to white
-
-    # Save the plot with a unique filename
-    graph_filename = f"Graph_pic/graph_{username}_{unique_timestamp}.png"
-    plt.savefig(graph_filename, facecolor='black')  # Ensure the background remains black when saved
-    plt.close()
-
-    # Send the plot back to the user
-    with open(graph_filename, 'rb') as image_file:
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=image_file)
-
+    # --- Отправка картинки пользователю ---
+    try:
+        with open(graph_filename, "rb") as image_file:
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=image_file,
+                caption=f"График функции:\n y = {expression_text}"
+            )
+    except Exception as e:
+        print("Ошибка при отправке картинки:", e)
+        await update.message.reply_text(
+            "⚠️ График построен, но не удалось отправить изображение."
+        )
 async def polgraph(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.effective_user.id
     username = update.effective_user.username
